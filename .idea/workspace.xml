@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="9ba3ba4c-21b2-48f8-a33b-d3979640105a" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JetBrains.gitignore" afterPath="$PROJECT_DIR$/JetBrains.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dump/features_crash_hpcc_0.pickle" afterPath="$PROJECT_DIR$/dump/features_crash_hpcc_0.pickle" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Vuls_HPC.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -106,7 +108,7 @@
         <entry file="file://$PROJECT_DIR$/JetBrains.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.117713004">
-              <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+              <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
               <folding />
             </state>
           </provider>
@@ -347,7 +349,7 @@
     <entry file="file://$PROJECT_DIR$/JetBrains.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.117713004">
-          <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+          <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
           <folding />
         </state>
       </provider>
