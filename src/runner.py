@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-import csv
+
 import numpy as np
 from pdb import set_trace
 from demos import cmd
@@ -9,15 +9,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from sk import rdivDemo
-import unicodedata
-import random
+
 from sklearn import svm
 from collections import Counter
-from scipy.sparse import csr_matrix
-from sklearn.cluster import KMeans
 
-from time import time
-from sklearn.feature_extraction.text import TfidfVectorizer
 from mar import MAR
 import pandas as pd
 
@@ -704,8 +699,8 @@ def CRASH(type, stop='true', error='none', interval = 100000, seed=0):
     result = {}
     result['est'] = (read.record_est)
     result['pos'] = (read.record)
-    with open("../dump/"+type+"_crash.pickle","wb") as handle:
-        pickle.dump(result,handle)
+    # with open("../dump/"+type+"_crash.pickle","wb") as handle:
+    #     pickle.dump(result,handle)
     return read
 
 
@@ -1757,7 +1752,7 @@ def auto_plot2():
 def error_hpcc_feature(fea, seed = 1):
     seed = int(seed)
     np.random.seed(seed)
-    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality']
+    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
 
 
     results={}
