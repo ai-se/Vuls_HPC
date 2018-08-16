@@ -1764,7 +1764,7 @@ def error_hpcc_feature(fea, seed = 1):
         elif fea == 'text':
             result = Random(type,stop='mix',seed=seed)
         elif fea == 'metrics':
-            result = Metrics(type,stop='mix',seed=seed)
+            result = Metrics(type,stop='true',seed=seed)
         elif fea == 'random':
             result = Rand(type,stop='true',seed=seed)
         elif fea == 'crash':
