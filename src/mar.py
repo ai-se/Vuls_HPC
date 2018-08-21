@@ -129,7 +129,59 @@ class MAR(object):
         self.body['count']=pd.Series([0]*len(label), index=self.body.index)
 
         return
-    
+
+    def preprocess(self):
+
+        if self.metrics=='only':
+            self.csr_mat = self.body[['CountClassBase', 'CountClassCoupled','CountClassDerived','CountDeclInstanceVariablePrivate','CountDeclMethod','CountInput','CountLine','CountOutput','Cyclomatic','MaxInheritanceTree','MaxNesting']].as_matrix()
+            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=1)
+            return
+
+        #######################################################
+
+        ### Feature selection by tfidf in order to keep vocabulary ###
+        tfidfer = TfidfVectorizer(lowercase=False, stop_words=None, norm=None, use_idf=True, smooth_idf=False,
+                                sublinear_tf=False,decode_error="ignore",max_features=4000)
+
+        # tfidfer = TfidfVectorizer(lowercase=False, stop_words=None, norm=None, use_idf=True, smooth_idf=False,
+        #                         sublinear_tf=False,decode_error="ignore",max_features=4000,token_pattern='(?u)\b(\w*\.*\w+)+\b',analyzer='word')
+
+        self.body['sourcecode'].fillna('', inplace=True)
+
+        tfidfer.fit(self.body['sourcecode'])
+
+        self.voc = tfidfer.vocabulary_.keys()
+
+        ##############################################################
+
+        ### Term frequency as feature, L2 normalization ##########
+        tfer = TfidfVectorizer(lowercase=True, stop_words=None, norm=None, use_idf=False,
+                        vocabulary=self.voc,decode_error="ignore")
+        # tfer = TfidfVectorizer(lowercase=True, stop_words="english", norm=None, use_idf=False,
+        #                 vocabulary=self.voc,decode_error="ignore")
+        self.csr_mat=tfer.fit_transform(self.body['sourcecode'])
+
+        if self.norm=='l2rowcol':
+            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=1)
+
+        if self.crash == 'append':
+            from scipy import sparse
+            self.csr_mat = sparse.hstack((self.csr_mat,np.array(self.body['crashes'])[:,None]))
+
+        if self.norm=='l2row':
+            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=1)
+        elif self.norm=='l2col' or self.norm=='l2rowcol':
+            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=0)
+        elif self.norm=='pca':
+            from sklearn.decomposition import PCA
+            norm = PCA(n_components=100)
+            self.csr_mat = norm.fit_transform(self.csr_mat.todense())
+        elif self.norm=='l1col':
+            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l1',axis=0)
+
+        ########################################################
+        return
+
     def lda(self):
         import lda
 
@@ -258,57 +310,6 @@ class MAR(object):
             ##
             for ind in yes+no+und:
                 csvwriter.writerow([self.body[field][ind] for field in fields])
-        return
-
-    def preprocess(self):
-
-        if self.metrics=='only':
-            self.csr_mat = self.body[['CountClassBase', 'CountClassCoupled','CountClassDerived','CountDeclInstanceVariablePrivate','CountDeclMethod','CountInput','CountLine','CountOutput','Cyclomatic','MaxInheritanceTree','MaxNesting']].as_matrix()
-            return
-
-        #######################################################
-
-        ### Feature selection by tfidf in order to keep vocabulary ###
-        tfidfer = TfidfVectorizer(lowercase=False, stop_words=None, norm=None, use_idf=True, smooth_idf=False,
-                                sublinear_tf=False,decode_error="ignore",max_features=4000)
-
-        # tfidfer = TfidfVectorizer(lowercase=False, stop_words=None, norm=None, use_idf=True, smooth_idf=False,
-        #                         sublinear_tf=False,decode_error="ignore",max_features=4000,token_pattern='(?u)\b(\w*\.*\w+)+\b',analyzer='word')
-
-        self.body['sourcecode'].fillna('', inplace=True)
-
-        tfidfer.fit(self.body['sourcecode'])
-
-        self.voc = tfidfer.vocabulary_.keys()
-
-        ##############################################################
-
-        ### Term frequency as feature, L2 normalization ##########
-        tfer = TfidfVectorizer(lowercase=True, stop_words=None, norm=None, use_idf=False,
-                        vocabulary=self.voc,decode_error="ignore")
-        # tfer = TfidfVectorizer(lowercase=True, stop_words="english", norm=None, use_idf=False,
-        #                 vocabulary=self.voc,decode_error="ignore")
-        self.csr_mat=tfer.fit_transform(self.body['sourcecode'])
-
-        if self.norm=='l2rowcol':
-            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=1)
-
-        if self.crash == 'append':
-            from scipy import sparse
-            self.csr_mat = sparse.hstack((self.csr_mat,np.array(self.body['crashes'])[:,None]))
-
-        if self.norm=='l2row':
-            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=1)
-        elif self.norm=='l2col' or self.norm=='l2rowcol':
-            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l2',axis=0)
-        elif self.norm=='pca':
-            from sklearn.decomposition import PCA
-            norm = PCA(n_components=100)
-            self.csr_mat = norm.fit_transform(self.csr_mat.todense())
-        elif self.norm=='l1col':
-            self.csr_mat = preprocessing.normalize(self.csr_mat,norm='l1',axis=0)
-
-        ########################################################
         return
 
     ## save model ##

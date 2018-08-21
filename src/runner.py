@@ -1752,8 +1752,8 @@ def auto_plot2():
 def error_hpcc_feature(fea, seed = 1):
     seed = int(seed)
     np.random.seed(seed)
-    # types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
-    types = ['all']
+    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    # types = ['all']
 
 
     results={}
@@ -2599,13 +2599,7 @@ def feature_summary():
 def plot_feature():
     filename = '../dump/features.pickle'
     result = pickle.load(open(filename, 'rb'))
-    files = ['vuls_data_dom.csv', 'vuls_data_js.csv', 'vuls_data_netwerk.csv', 'vuls_data_gfx.csv',
-             'vuls_data_other.csv', 'vuls_data_new.csv']
-    features = ['text','combine']
-
-
-    name = {'vuls_data_dom.csv': 'Module: dom', 'vuls_data_js.csv': 'Module: js', 'vuls_data_netwerk.csv': 'Module: netwerk', 'vuls_data_gfx.csv': 'Module: gfx',
-             'vuls_data_other.csv': 'Other modules', 'vuls_data_new.csv': 'Entire project', 'Median': 'Median'}
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality']
 
     font = {'family': 'normal',
             'weight': 'bold',
@@ -2691,12 +2685,10 @@ def sum_feature():
     result = pickle.load(open(filename, 'rb'))
     stop = [0.6,0.7,0.8,0.85,0.9,0.95,0.99,1.0]
     stop_est = [0.9,0.95,0.99]
-    files = ['vuls_data_dom.csv', 'vuls_data_js.csv', 'vuls_data_netwerk.csv', 'vuls_data_gfx.csv',
-             'vuls_data_other.csv', 'vuls_data_new.csv']
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'all']
     cols = ["Dataset"]+stop
 
-    name = {'vuls_data_dom.csv': 'Module: dom', 'vuls_data_js.csv': 'Module: js', 'vuls_data_netwerk.csv': 'Module: netwerk', 'vuls_data_gfx.csv': 'Module: gfx',
-             'vuls_data_other.csv': 'Other modules', 'vuls_data_new.csv': 'Entire project', 'Median': 'Median'}
+
 
     for fea in result:
         dictdf = {col: [] for col in cols}
@@ -2704,7 +2696,7 @@ def sum_feature():
 
         medians={}
         for file in files:
-            dictdf['Dataset'].append(name[file])
+            dictdf['Dataset'].append(file)
             for cor in stop:
                 x = result[fea][file]['stop'][cor]
                 try:
@@ -2761,7 +2753,7 @@ def sum_feature():
 
         medians={}
         for file in files:
-            dictdf['Dataset'].append(name[file])
+            dictdf['Dataset'].append(file)
             for cor in stop_est:
                 x = result[fea][file]['stop_est'][cor]['recall']
                 try:
