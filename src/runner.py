@@ -1752,12 +1752,18 @@ def auto_plot2():
 def error_hpcc_feature(fea, seed = 1):
     seed = int(seed)
     np.random.seed(seed)
-    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    # types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    types = ['all']
 
 
     results={}
 
     for type in types:
+        try:
+            with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","r") as handle:
+                results = pickle.load(handle)
+        except:
+            pass
         print(str(seed)+": "+type+": "+ fea+ ": ", end='')
         if fea == 'combine':
             result = BM25(type,stop='mix',seed=seed)
@@ -2521,10 +2527,9 @@ def error_sumlatex():
 
 def feature_summary():
     # import cPickle as pickle
-    files = {'vuls_data_dom.csv':3505,'vuls_data_js.csv':1421,'vuls_data_netwerk.csv':698,'vuls_data_gfx.csv':4814,'vuls_data_other.csv':18312,'vuls_data_new.csv':28750}
-    vuls = {'vuls_data_dom.csv': 86, 'vuls_data_js.csv': 57, 'vuls_data_netwerk.csv': 29, 'vuls_data_gfx.csv': 28,
-             'vuls_data_other.csv': 71, 'vuls_data_new.csv': 271}
-    features = ['combine','metrics','random','text']
+    files = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
+    vuls = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
+    features = ['combine','random','text']
 
     result = {}
     for fea in features:
@@ -2532,7 +2537,6 @@ def feature_summary():
         for i in xrange(30):
             filename = '../dump/features_'+fea+'_hpcc_'+str(i)+'.pickle'
             tmp = pickle.load(open(filename, 'rb'))
-            set_trace()
             for f in tmp:
                 x = np.array(tmp[f]['pos']['x'])/files[f]
                 pos = np.array(tmp[f]['pos']['pos'])/vuls[f]
@@ -2586,9 +2590,10 @@ def feature_summary():
                     result[fea][f]['stop_est'][key]['recall'].append(re2[key])
                     result[fea][f]['stop_est'][key]['cost'].append(re[key])
 
-
+    set_trace()
     filename = '../dump/features.pickle'
     pickle.dump(result,open(filename, 'wb'))
+
 
 
 def plot_feature():
