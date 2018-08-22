@@ -805,7 +805,7 @@ def Metrics(type, stop='true', error='none', interval = 100000, seed=0):
     read.metrics='only'
 
     read = read.create("vuls_data_new.csv",type)
-    read.step = 1000
+    read.step = 100
 
     read.interval = interval
 
@@ -2529,7 +2529,7 @@ def feature_summary():
     # import cPickle as pickle
     files = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
     vuls = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
-    features = ['combine','random','text']
+    features = ['combine','random','text','metrics']
 
     result = {}
     for fea in features:
@@ -2590,7 +2590,6 @@ def feature_summary():
                     result[fea][f]['stop_est'][key]['recall'].append(re2[key])
                     result[fea][f]['stop_est'][key]['cost'].append(re[key])
 
-    set_trace()
     filename = '../dump/features.pickle'
     pickle.dump(result,open(filename, 'wb'))
 
