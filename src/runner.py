@@ -566,14 +566,14 @@ def parse_data_new(mode='source', path='../../Datasets/firefox/', file0='vulns.c
     vulns_types = pd.read_csv('../../Datasets/vulns/' + str(file0))
     types = {}
     pretype = ''
-    mapping = {'arbitrary-code': 'Arbitrary Code', 'Code - Code Quality': 'Code Quality', 'Code - Resource Management Error - Improper Resource Shutdown or Release': 'Improper Control of a Resource Through its Lifetime', 'buffer-overflow': 'Range Error', 'data-leakage': 'Improper Control of a Resource Through its Lifetime', 'use-after-free': 'Improper Control of a Resource Through its Lifetime', 'Code - Resource Management Error - Uncontrolled Resource Consumption': 'Improper Control of a Resource Through its Lifetime', 'Code - Time and State - Race Conditions': 'Other', 'memory-corruption': 'Range Error', 'Code - Resource Management Error': 'Improper Control of a Resource Through its Lifetime', 'Code - Traversal - Link Following': 'Other', '?': 'Other', 'spoofing': 'Other', 'privilege-escalation': 'Other', 'Code - Traversal': 'Other', 'Code - Data Processing': 'Other', 'cross-site-scripting': 'Other', 'exploitable-crash': 'Other', 'Environment': 'Other', 'Code - Resource Management Error - Use After Free': 'Improper Control of a Resource Through its Lifetime', 'denial-of-service': 'Improper Control of a Resource Through its Lifetime', 'Configuration': 'Other', 'injection': 'Other', 'Code - Security Features - Protection Mechanism Failure': 'Other'}
+    mapping = {'arbitrary-code': 'Arbitrary Code', 'Code - Code Quality': 'Code Quality', 'Code - Resource Management Error - Improper Resource Shutdown or Release': 'Improper Control of a Resource Through its Lifetime', 'buffer-overflow': 'Range Error', 'data-leakage': 'Improper Control of a Resource Through its Lifetime', 'use-after-free': 'Improper Control of a Resource Through its Lifetime', 'Code - Resource Management Error - Uncontrolled Resource Consumption': 'Improper Control of a Resource Through its Lifetime', 'Code - Time and State - Race Conditions': 'Other', 'memory-corruption': 'Range Error', 'Code - Resource Management Error': 'Improper Control of a Resource Through its Lifetime', 'Code - Traversal - Link Following': 'Other', '?': 'Other', 'spoofing': 'Improper Control of a Resource Through its Lifetime', 'privilege-escalation': 'Other', 'Code - Traversal': 'Other', 'Code - Data Processing': 'Other', 'cross-site-scripting': 'Arbitrary Code', 'exploitable-crash': 'Range Error', 'Environment': 'Other', 'Code - Resource Management Error - Use After Free': 'Improper Control of a Resource Through its Lifetime', 'denial-of-service': 'Improper Control of a Resource Through its Lifetime', 'Configuration': 'Other', 'injection': 'Arbitrary Code', 'Code - Security Features - Protection Mechanism Failure': 'Arbitrary Code'}
     for i, name in enumerate(vulns_types['file']):
         if name not in types:
             types[name] = []
         if not pd.isnull(vulns_types['type'][i]):
             pretype = mapping[vulns_types['type'][i]]
         types[name].append(pretype)
-
+    set_trace()
     vulns = pd.read_csv('../../Datasets/vulns/' + str(file1))
     type_col = []
     newcol = []
