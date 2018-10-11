@@ -1786,17 +1786,49 @@ def error_hpcc_more(cor, error_rate = 0.5, seed = 1):
     error_rate = float(error_rate)
     seed = int(seed)
     np.random.seed(seed)
-    files = ['vuls_data_dom.csv','vuls_data_js.csv','vuls_data_netwerk.csv','vuls_data_gfx.csv','vuls_data_other.csv','vuls_data_new.csv']
-    # files = ['vuls_data_new.csv']
-    # files = ['vuls_data_dom.csv','vuls_data_js.csv','vuls_data_netwerk.csv','vuls_data_gfx.csv','vuls_data_other.csv']
+    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
 
-    # correct = ['machine']
+
 
     Runfunc = Random
 
     results={}
 
-    for file in files:
+    for file in types:
+        print(str(seed)+": "+file+": "+ cor+ ": ", end='')
+        if cor == 'majority':
+            result = Runfunc(file,stop='est',error='three',error_rate = error_rate, seed=seed)
+        elif cor == 'machine':
+            result = Runfunc(file,stop='est',error='random',error_rate = error_rate, correct = 'machine', interval = 1, seed=seed)
+        elif cor == 'knee':
+            result = Runfunc(file,stop='knee',error='random',error_rate = error_rate, correct = 'no', seed=seed)
+        elif cor == 'random':
+            result = Runfunc(file,stop='est',error='random',error_rate = error_rate, correct = 'random', interval = 1, seed=seed)
+        elif cor == 'machine3':
+            result = Runfunc(file,stop='est',error='random3',error_rate = error_rate, correct = 'machine', interval = 1, seed=seed)
+        else:
+            result = Runfunc(file,stop='est',error='random', error_rate = error_rate, seed=seed)
+
+        results[file] = analyze(result)
+        with open("../dump/error_"+str(cor)+"_hpcc"+str(int(error_rate*100))+"_"+str(seed)+".pickle","w") as handle:
+            pickle.dump(results,handle)
+
+def error_hpcc_continue(cor, error_rate = 0.5, seed = 1):
+    error_rate = float(error_rate)
+    seed = int(seed)
+    np.random.seed(seed)
+    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+
+
+
+    Runfunc = Random
+
+    results = pickle.load(open("../dump/error_"+str(cor)+"_hpcc"+str(int(error_rate*100))+"_"+str(seed)+".pickle","r"))
+
+    for i,file in enumerate(types):
+        if i<3:
+            continue
+
         print(str(seed)+": "+file+": "+ cor+ ": ", end='')
         if cor == 'majority':
             result = Runfunc(file,stop='est',error='three',error_rate = error_rate, seed=seed)
@@ -1901,16 +1933,17 @@ def error_summary():
 def error_summary_new():
     # import cPickle as pickle
 
-    methods = ['none','majority','machine','knee','machine3','random']
+    methods = ['none','majority','machine','knee','machine3']
     errors = ['0','10','20','30','40','50']
     # errors = ['0','10','20','30']
-    files = ['vuls_data_dom.csv','vuls_data_js.csv','vuls_data_netwerk.csv','vuls_data_gfx.csv','vuls_data_other.csv','vuls_data_new.csv']
+
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
 
     for error in errors:
         results = {file:{m:{} for m in methods} for file in files}
         for method in methods:
 
-            for i in xrange(30):
+            for i in xrange(10):
                 try:
                     with open("../dump/error_"+str(method)+"_hpcc"+str(error)+"_"+str(i)+".pickle","r") as handle:
                         tmp = (pickle.load(handle))
@@ -1923,7 +1956,6 @@ def error_summary_new():
                         if not key in results[f][method]:
                             results[f][method][key] = []
                         results[f][method][key].append(tmp[f][key])
-
 
 
 
@@ -2280,12 +2312,7 @@ def recall_cost(error='30',crash = 'new'):
 def error_sk():
     files = ['vuls_data_dom.csv', 'vuls_data_js.csv', 'vuls_data_netwerk.csv', 'vuls_data_gfx.csv',
              'vuls_data_other.csv', 'vuls_data_new.csv']
-    name = {'vuls_data_dom.csv': 'Module: dom', 'vuls_data_js.csv': 'Module: js', 'vuls_data_netwerk.csv': 'Module: netwerk', 'vuls_data_gfx.csv': 'Module: gfx',
-             'vuls_data_other.csv': 'Other modules', 'vuls_data_new.csv': 'Entire project', 'Median': 'Median'}
     correct = ['none', 'majority', 'machine', 'knee']
-    total = {'vuls_data_dom.csv': 86, 'vuls_data_js.csv': 57, 'vuls_data_netwerk.csv': 29, 'vuls_data_gfx.csv': 28,
-             'vuls_data_other.csv': 71, 'vuls_data_new.csv': 271}
-    total2 = {'vuls_data_dom.csv': 3505,'vuls_data_js.csv': 1421,'vuls_data_netwerk.csv': 698,'vuls_data_gfx.csv': 4814,'vuls_data_other.csv': 18312,'vuls_data_new.csv':28750}
     metrics = ['Recall', 'Cost']
 
     errors = ['00','10','20','30','40','50']
@@ -2332,14 +2359,11 @@ def error_sk():
         set_trace()
 
 def error_sumlatex():
-    files = ['vuls_data_dom.csv', 'vuls_data_js.csv', 'vuls_data_netwerk.csv', 'vuls_data_gfx.csv',
-             'vuls_data_other.csv', 'vuls_data_new.csv']
-    name = {'vuls_data_dom.csv': 'Module: dom', 'vuls_data_js.csv': 'Module: js', 'vuls_data_netwerk.csv': 'Module: netwerk', 'vuls_data_gfx.csv': 'Module: gfx',
-             'vuls_data_other.csv': 'Other modules', 'vuls_data_new.csv': 'Entire project', 'Median': 'Median'}
-    correct = ['none','majority','machine','knee','machine3','random']
-    total = {'vuls_data_dom.csv': 86, 'vuls_data_js.csv': 57, 'vuls_data_netwerk.csv': 29, 'vuls_data_gfx.csv': 28,
-             'vuls_data_other.csv': 71, 'vuls_data_new.csv': 271}
-    total2 = {'vuls_data_dom.csv': 3505,'vuls_data_js.csv': 1421,'vuls_data_netwerk.csv': 698,'vuls_data_gfx.csv': 4814,'vuls_data_other.csv': 18312,'vuls_data_new.csv':28750}
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other','all']
+    name = {'Arbitrary Code': 'Arbitrary Code', 'Improper Control of a Resource Through its Lifetime': 'Improper Control of a Resource Through its Lifetime', 'Other': 'Other', 'Range Error':'Range Error', 'Code Quality':'Code Quality', 'all': 'all', 'Median': 'Median'}
+    correct = ['none','majority','knee','machine','machine3']
+    total = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
+    total2 = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
     metrics = ['Recall', 'Cost']
 
 
@@ -2427,6 +2451,7 @@ def error_sumlatex():
 
         trans = results
 
+
         # for file in files:
         #     trans[file] = {}
         #     for cor in correct:
@@ -2506,20 +2531,19 @@ def error_sumlatex():
         #         x = np.array(trans[file][cor]['count']) / total2[file] / bl0[file]['Cost']
         #         median = str(int(np.median(x)*100))
         #         iqr = str(int((np.percentile(x,75)-np.percentile(x,25))*100))
-        #         dictdf['Cost_'+cor].append(median + '(' + iqr + ')')
 
 
-        col1 = cols[:5]+cols[7:11]
-        col2 = [cols[0]]+[cols[5]]+[cols[2]]+[cols[3]]+[cols[6]]+ [cols[11]]+[cols[8]]+[cols[9]]+[cols[12]]
-        df1 = pd.DataFrame(data=dictdf,
-                          columns=col1)
-        df1.to_csv("../dump/error_" + str(error) + '.csv')
-        df2 = pd.DataFrame(data=dictdf,
-                          columns=col2)
-        df2.to_csv("../dump/error2_" + str(error) + '.csv')
+        # col1 = cols[:5]+cols[6:10]
+        # col2 = [cols[0]]+[cols[5]]+[cols[2]]+[cols[3]]+[ [cols[10]]+[cols[7]]+[cols[8]]]
+        # df1 = pd.DataFrame(data=dictdf,
+        #                   columns=col1)
+        # df1.to_csv("../dump/error_" + str(error) + '.csv')
+        # df2 = pd.DataFrame(data=dictdf,
+        #                   columns=col2)
+        # df2.to_csv("../dump/error2_" + str(error) + '.csv')
         df = pd.DataFrame(data=dictdf,
                           columns=cols)
-        df.to_csv("../dump/errorall_" + str(error) + '.csv')
+        df.to_csv("../figure/errorall_" + str(error) + '.csv')
 
 
 ############
@@ -2529,14 +2553,17 @@ def feature_summary():
     # import cPickle as pickle
     files = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
     vuls = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
-    features = ['combine','random','text','metrics']
+    features = ['combine','random','text','metrics','crash']
 
     result = {}
     for fea in features:
         result[fea]={f:{'x':[],'pos':[],'est':[],'stop':{0.6:[],0.7:[],0.8:[],0.85:[],0.9:[],0.95:[],0.99:[],1.0:[]}, 'stop_est':{0.9:{'recall':[],'cost':[]},0.95:{'recall':[],'cost':[]},0.99:{'recall':[],'cost':[]}}} for f in files}
         for i in xrange(30):
-            filename = '../dump/features_'+fea+'_hpcc_'+str(i)+'.pickle'
-            tmp = pickle.load(open(filename, 'rb'))
+            try:
+                filename = '../dump/features_'+fea+'_hpcc_'+str(i)+'.pickle'
+                tmp = pickle.load(open(filename, 'rb'))
+            except:
+                continue
             for f in tmp:
                 x = np.array(tmp[f]['pos']['x'])/files[f]
                 pos = np.array(tmp[f]['pos']['pos'])/vuls[f]
@@ -2598,7 +2625,8 @@ def feature_summary():
 def plot_feature():
     filename = '../dump/features.pickle'
     result = pickle.load(open(filename, 'rb'))
-    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality']
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other', 'all']
+    # files = ['all']
 
     font = {'family': 'normal',
             'weight': 'bold',
@@ -2663,7 +2691,7 @@ def plot_feature():
         ax.plot(x['cost'],x['75'],color='blue',linestyle = '--')
         ax.plot(x['cost'],x['25'],color='blue',linestyle = '--')
 
-        ax.plot(y['cost'],y['50'],color='red',linestyle = '-',label='Combine')
+        ax.plot(y['cost'],y['50'],color='red',linestyle = '-',label='Hybrid')
         ax.plot(y['cost'],y['75'],color='red',linestyle = '--')
         ax.plot(y['cost'],y['25'],color='red',linestyle = '--')
 
@@ -2671,6 +2699,9 @@ def plot_feature():
 
         plt.subplots_adjust(top=0.95, left=0.12, bottom=0.2, right=0.75)
         ax.legend(bbox_to_anchor=(1.02, 1), loc=2, ncol=1, borderaxespad=0.)
+
+
+
 
         plt.ylabel("Estimation")
         plt.xlabel("Cost")
@@ -2684,9 +2715,9 @@ def sum_feature():
     result = pickle.load(open(filename, 'rb'))
     stop = [0.6,0.7,0.8,0.85,0.9,0.95,0.99,1.0]
     stop_est = [0.9,0.95,0.99]
-    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'all']
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other', 'all']
+    # files = ['Other']
     cols = ["Dataset"]+stop
-
 
 
     for fea in result:
@@ -2731,7 +2762,7 @@ def sum_feature():
 
         df = pd.DataFrame(data=dictdf,
                           columns=cols)
-        df.to_csv("../dump/feature_stop_" + str(fea) + '.csv')
+        df.to_csv("../figure/feature_stop_" + str(fea) + '.csv')
 
 
 
@@ -2804,7 +2835,7 @@ def sum_feature():
 
         df = pd.DataFrame(data=dictdf,
                           columns=cols)
-        df.to_csv("../dump/feature_est_" + str(fea) + '.csv')
+        df.to_csv("../figure/feature_est_" + str(fea) + '.csv')
 
 
 if __name__ == "__main__":
