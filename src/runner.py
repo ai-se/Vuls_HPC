@@ -567,11 +567,7 @@ def parse_data_new(mode='source', path='../../Datasets/firefox/', file0='vulns.c
     types = {}
     pretype = ''
     mapping = {'arbitrary-code': 'Arbitrary Code', 'Code - Code Quality': 'Code Quality', 'Code - Resource Management Error - Improper Resource Shutdown or Release': 'Improper Control of a Resource Through its Lifetime', 'buffer-overflow': 'Range Error', 'data-leakage': 'Improper Control of a Resource Through its Lifetime', 'use-after-free': 'Improper Control of a Resource Through its Lifetime', 'Code - Resource Management Error - Uncontrolled Resource Consumption': 'Improper Control of a Resource Through its Lifetime', 'Code - Time and State - Race Conditions': 'Other', 'memory-corruption': 'Range Error', 'Code - Resource Management Error': 'Improper Control of a Resource Through its Lifetime', 'Code - Traversal - Link Following': 'Other', '?': 'Other', 'spoofing': 'Improper Control of a Resource Through its Lifetime', 'privilege-escalation': 'Other', 'Code - Traversal': 'Other', 'Code - Data Processing': 'Other', 'cross-site-scripting': 'Arbitrary Code', 'exploitable-crash': 'Range Error', 'Environment': 'Other', 'Code - Resource Management Error - Use After Free': 'Improper Control of a Resource Through its Lifetime', 'denial-of-service': 'Improper Control of a Resource Through its Lifetime', 'Configuration': 'Other', 'injection': 'Arbitrary Code', 'Code - Security Features - Protection Mechanism Failure': 'Arbitrary Code'}
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 95203ced5ea22e4bc85fa18d31cc54db871c15ef
     for i, name in enumerate(vulns_types['file']):
         if name not in types:
             types[name] = []
@@ -2630,7 +2626,7 @@ def feature_summary():
 
 def plot_feature():
     filename = '../dump/features.pickle'
-    result = pickle.load(open(filename, 'rb'))
+    result = pickle.load(open(filename, 'r'))
     files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other', 'all']
     # files = ['all']
 
@@ -2690,7 +2686,7 @@ def plot_feature():
         plt.figure(1)
         ax=plt.subplot(111)
 
-
+        ax.plot(x['cost'],[1]*len(x['cost']),color='.75',linestyle = '-',label = 'true')
 
 
         ax.plot(x['cost'],x['50'],color='blue',linestyle = '-',label='Text')
@@ -2701,7 +2697,7 @@ def plot_feature():
         ax.plot(y['cost'],y['75'],color='red',linestyle = '--')
         ax.plot(y['cost'],y['25'],color='red',linestyle = '--')
 
-        ax.plot(x['cost'],[1]*len(x['cost']),color='black',linestyle = '-',label = 'true')
+
 
         plt.subplots_adjust(top=0.95, left=0.12, bottom=0.2, right=0.75)
         ax.legend(bbox_to_anchor=(1.02, 1), loc=2, ncol=1, borderaxespad=0.)
