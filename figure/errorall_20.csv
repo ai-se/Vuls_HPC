@@ -1,0 +1,8 @@
+,Dataset,Recall_majority,Recall_knee,Recall_machine,Recall_machine3,Cost_majority,Cost_knee,Cost_machine,Cost_machine3
+0,Arbitrary Code,95(2),82(9),96(4),97(3),196(26),63(26),130(23),155(37)
+1,Improper Control of a Resource Through its Lifetime,96(2),91(5),95(2),97(2),204(22),60(4),147(15),196(19)
+2,Range Error,93(5),87(28),93(3),98(3),204(28),64(38),140(15),180(20)
+3,Code Quality,96(3),79(17),96(6),98(3),210(19),39(15),154(17),197(5)
+4,Other,97(4),86(20),96(6),100(0),202(26),49(41),147(14),191(13)
+5,all,96(1),87(2),95(1),99(0),199(3),49(7),148(4),200(3)
+6,Median,96(3),86(11),95(3),98(3),201(22),52(28),145(15),194(19)

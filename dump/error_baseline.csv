@@ -1,0 +1,8 @@
+,Dataset,Recall,Cost
+0,Arbitrary Code,99(1),45(5)
+1,Improper Control of a Resource Through its Lifetime,100(0),46(2)
+2,Range Error,100(0),58(7)
+3,Code Quality,100(0),55(3)
+4,Other,97(0),50(5)
+5,all,99(0),58(0)
+6,Median,100(0),52(11)
