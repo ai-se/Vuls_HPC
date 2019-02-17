@@ -1008,7 +1008,7 @@ def Rand(type, stop='true', error='none', interval = 100000, seed=0):
             read.code_error(id, error=error)
         if pos+neg>0:
             result['est']['x'].append(pos+neg)
-            result['est']['semi'].append(pos/(pos+neg)*total)
+            result['est']['semi'].append(float(pos)/(pos+neg)*total)
 
     result['pos'] = (read.record)
 
@@ -2655,6 +2655,7 @@ def plot_feature():
 
         start = max((start,start2))
         end = min((end,end2))
+        set_trace()
 
 
         text = []
@@ -2679,6 +2680,16 @@ def plot_feature():
         y['75'] = [np.percentile(t,75) for t in combine]
         y['25'] = [np.percentile(t,25) for t in combine]
 
+        u_random = []
+        for i in xrange(start, end):
+            u_random.append([est[i] for est in result['random'][file]['est']])
+
+        z = {}
+        z['cost'] = result['random'][file]['x'][0][start:end]
+        z['50'] = [np.median(t) for t in u_random]
+        z['75'] = [np.percentile(t, 75) for t in u_random]
+        z['25'] = [np.percentile(t, 25) for t in u_random]
+
 
 
 
@@ -2696,6 +2707,10 @@ def plot_feature():
         ax.plot(y['cost'],y['50'],color='red',linestyle = '-',label='Hybrid')
         ax.plot(y['cost'],y['75'],color='red',linestyle = '--')
         ax.plot(y['cost'],y['25'],color='red',linestyle = '--')
+
+        ax.plot(z['cost'],z['50'],color='yellow',linestyle = '-',label='Uniformed Random Sampling')
+        ax.plot(z['cost'],z['75'],color='yellow',linestyle = '--')
+        ax.plot(z['cost'],z['25'],color='yellow',linestyle = '--')
 
 
 
