@@ -1012,7 +1012,7 @@ def Rand(type, stop='true', error='none', interval = 100000, seed=0):
 
     result['pos'] = (read.record)
 
-    return read
+    return result
 
 ########
 def BM25_est(filename, stop='true', error='none', interval = 100000, seed=0):
@@ -1779,8 +1779,10 @@ def error_hpcc_feature(fea, seed = 1):
             result = CRASH(type,stop='true',seed=seed)
         else:
             result = Rand(type,stop='true',seed=seed)
-
-        results[type] = {'pos':result.record,'est':result.record_est}
+        if fea=='random':
+            results[type] = result
+        else:
+            results[type] = {'pos':result.record,'est':result.record_est}
         with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","w") as handle:
             pickle.dump(results,handle)
 
