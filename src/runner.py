@@ -984,7 +984,7 @@ def Rand(type, stop='true', error='none', interval = 100000, seed=0):
     read = read.create("vuls_data_new.csv",type)
 
     read.interval = interval
-    read.step = 10
+    read.step = 100
 
     num2 = read.get_allpos()
     target = int(num2 * stopat)
@@ -2638,7 +2638,7 @@ def plot_feature():
 
 
     plt.rc('font', **font)
-    paras = {'lines.linewidth': 4, 'legend.fontsize': 28, 'axes.labelsize': 40, 'legend.frameon': True,
+    paras = {'lines.linewidth': 1, 'legend.fontsize': 28, 'axes.labelsize': 40, 'legend.frameon': True,
              'figure.autolayout': False, 'figure.figsize': (16, 6)}
     plt.rcParams.update(paras)
 
@@ -2657,7 +2657,7 @@ def plot_feature():
 
         start = max((start,start2))
         end = min((end,end2))
-        set_trace()
+
 
 
         text = []
@@ -2683,11 +2683,11 @@ def plot_feature():
         y['25'] = [np.percentile(t,25) for t in combine]
 
         u_random = []
-        for i in xrange(start, end):
+        for i in xrange(start*10, end*10):
             u_random.append([est[i] for est in result['random'][file]['est']])
 
         z = {}
-        z['cost'] = result['random'][file]['x'][0][start:end]
+        z['cost'] = result['random'][file]['x'][0][start*10:end*10]
         z['50'] = [np.median(t) for t in u_random]
         z['75'] = [np.percentile(t, 75) for t in u_random]
         z['25'] = [np.percentile(t, 25) for t in u_random]
@@ -2699,20 +2699,22 @@ def plot_feature():
         plt.figure(1)
         ax=plt.subplot(111)
 
-        ax.plot(x['cost'],[1]*len(x['cost']),color='.75',linestyle = '-',label = 'true')
+        ax.plot(x['cost'],[1]*len(x['cost']),color='black',linestyle = '-',label = 'true')
+
+        ax.plot(z['cost'],z['50'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = '-',label='Uniform\nRandom\nSampling')
+        ax.plot(z['cost'],z['75'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
+        ax.plot(z['cost'],z['25'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
 
 
-        ax.plot(x['cost'],x['50'],color='blue',linestyle = '-',label='Text')
-        ax.plot(x['cost'],x['75'],color='blue',linestyle = '--')
-        ax.plot(x['cost'],x['25'],color='blue',linestyle = '--')
+        ax.plot(x['cost'],x['50'],color='blue',marker='$\\circ$',markevery=(7,20), markersize=25,linestyle = '-',label='Text')
+        ax.plot(x['cost'],x['75'],color='blue',marker='$\\circ$',markevery=(7,20),markersize=25,linestyle = ':')
+        ax.plot(x['cost'],x['25'],color='blue',marker='$\\circ$',markevery=(7,20),markersize=25,linestyle = ':')
 
-        ax.plot(y['cost'],y['50'],color='red',linestyle = '-',label='Hybrid')
-        ax.plot(y['cost'],y['75'],color='red',linestyle = '--')
-        ax.plot(y['cost'],y['25'],color='red',linestyle = '--')
+        ax.plot(y['cost'],y['50'],color='red',marker='$\\Delta$',markevery=(14,20), markersize=25,linestyle = '-',label='Hybrid')
+        ax.plot(y['cost'],y['75'],color='red',marker='$\\Delta$',markevery=(14,20),markersize=25,linestyle = ':')
+        ax.plot(y['cost'],y['25'],color='red',marker='$\\Delta$',markevery=(14,20),markersize=25,linestyle = ':')
 
-        ax.plot(z['cost'],z['50'],color='yellow',linestyle = '-',label='Uniformed Random Sampling')
-        ax.plot(z['cost'],z['75'],color='yellow',linestyle = '--')
-        ax.plot(z['cost'],z['25'],color='yellow',linestyle = '--')
+
 
 
 
@@ -2720,12 +2722,12 @@ def plot_feature():
         ax.legend(bbox_to_anchor=(1.02, 1), loc=2, ncol=1, borderaxespad=0.)
 
 
-
+        names = {'Arbitrary Code':'Arbitrary_Code', 'Improper Control of a Resource Through its Lifetime':'Resource_Control', 'Range Error':'Range_Error', 'Code Quality':'Code_Quality', 'Other':'Other', 'all':'all'}
 
         plt.ylabel("Estimation")
         plt.xlabel("Cost")
-        plt.savefig("../figure/est_" + str(file) + ".pdf")
-        plt.savefig("../figure/est_" + str(file) + ".png")
+        plt.savefig("../figure/est_" + str(names[file]) + ".pdf")
+        plt.savefig("../figure/est_" + str(names[file]) + ".png")
         plt.close()
 
 
