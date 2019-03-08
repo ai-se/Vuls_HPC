@@ -975,6 +975,102 @@ def Random(type, stop='true', error='none', error_rate = 0.5, correct = 'no', in
     print(results)
     return read
 
+def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correct = 'no', interval = 100000, seed=0, neg_len=0.5):
+    stopat = 1
+    thres = 0
+    starting = 1
+    counter = 0
+    pos_last = 0
+    np.random.seed(seed)
+    read = MAR()
+
+    if fea=='text':
+        read.false_neg = float(error_rate)
+        read.correction=correct
+        read.neg_len=float(neg_len)
+    else:
+
+        read.norm = 'l2col'
+        read.metrics='only'
+
+    read = read.create("vuls_data_new.csv",type)
+    read.step = 100
+
+    read.interval = interval
+
+    num2 = read.get_allpos()
+    target = int(num2 * stopat)
+
+    read.enable_est = True
+
+
+    while True:
+        pos, neg, total = read.get_numbers()
+        try:
+            print("%d, %d, %d" %(pos,pos+neg, read.est_num))
+        except:
+            print("%d, %d" %(pos,pos+neg))
+
+        if pos + neg >= total:
+            if (stop=='knee') and error=='random':
+                coded = np.where(np.array(read.body['code']) != "undetermined")[0]
+                seq = coded[np.argsort(read.body['time'][coded])]
+                part1 = set(seq[:read.record['x'][read.kneepoint]]) & set(
+                    np.where(np.array(read.body['code']) == "no")[0])
+                # part2 = set(seq[read.record['x'][read.kneepoint]:]) & set(
+                #     np.where(np.array(read.body['code']) == "yes")[0])
+                # for id in part1 | part2:
+                for id in part1:
+                    read.code_error(id, error=error)
+            break
+
+        if pos < starting or pos+neg<thres:
+            for id in read.random():
+                read.code_error(id, error=error)
+        else:
+            a,b,c,d =read.train_semi(weighting=True)
+            if stop == 'est':
+                if stopat * read.est_num <= pos:
+                    break
+            elif stop == 'soft':
+                if pos>0 and pos_last==pos:
+                    counter = counter+1
+                else:
+                    counter=0
+                pos_last=pos
+                if counter >=5:
+                    break
+            elif stop == 'knee':
+                if pos>0:
+                    if read.knee():
+                        if error=='random':
+                            coded = np.where(np.array(read.body['code']) != "undetermined")[0]
+                            seq = coded[np.argsort(np.array(read.body['time'])[coded])]
+                            part1 = set(seq[:read.kneepoint * read.step]) & set(
+                                np.where(np.array(read.body['code']) == "no")[0])
+                            # part2 = set(seq[read.kneepoint * read.step:]) & set(
+                            #     np.where(np.array(read.body['code']) == "yes")[0])
+                            # for id in part1 | part2:
+                            for id in part1:
+                                read.code_error(id, error=error)
+                        break
+            elif stop == 'true':
+                if pos >= target:
+                    break
+            elif stop == 'mix':
+                if pos >= target and stopat * read.est_num <= pos:
+                    break
+            if pos < 10:
+                for id in a:
+                    read.code_error(id, error=error)
+            else:
+                for id in c:
+                    read.code_error(id, error=error)
+    # read.export()
+    results = analyze(read)
+    print(results)
+    return read
+
 def Rand(type, stop='true', error='none', interval = 100000, seed=0):
     stopat = 1
 
@@ -1777,6 +1873,8 @@ def error_hpcc_feature(fea, seed = 1):
             result = Rand(type,stop='true',seed=seed)
         elif fea == 'crash':
             result = CRASH(type,stop='true',seed=seed)
+        elif fea == 'semi':
+            result = Semi(type,stop='true',seed=seed)
         else:
             result = Rand(type,stop='true',seed=seed)
         if fea=='random':
@@ -2624,6 +2722,126 @@ def feature_summary():
     filename = '../dump/features.pickle'
     pickle.dump(result,open(filename, 'wb'))
 
+def plot_all_feature():
+    filename = '../dump/features.pickle'
+    result = pickle.load(open(filename, 'r'))
+    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other', 'all']
+    # files = ['all']
+
+    font = {'family': 'normal',
+            'weight': 'bold',
+            'size': 30}
+
+
+    plt.rc('font', **font)
+    paras = {'lines.linewidth': 3, 'legend.fontsize': 40, 'axes.labelsize': 40, 'legend.frameon': True,
+             'figure.autolayout': False, 'figure.figsize': (32, 24)}
+    plt.rcParams.update(paras)
+    fig = plt.figure(1)
+    titles = ['(a) Protection Mechanism Failure', '(b) Resource Management Errors', '(c) Data Processing Errors', '(d) Code Quality', '(e) Other', '(f) All Vulnerability Types']
+
+
+    for id,file in enumerate(files):
+        start = 0
+        end = 1000000
+        for est in result['text'][file]['est']:
+            start = max((start,np.where(est==0)[0][-1]+1))
+            end = min((end,len(est)))
+        start2 = 0
+        end2 = 1000000
+        for est in result['combine'][file]['est']:
+            start2 = max((start2,np.where(est==0)[0][-1]+1))
+            end2 = min((end2,len(est)))
+
+        start3 = 0
+        end3 = 1000000
+        for est in result['random'][file]['est']:
+            start3 = max((start3,np.where(est==0)[0][-1]+1))
+            end3 = min((end3,len(est)))
+
+        # start = max((start,start2))
+        # end = min((end,end2))
+
+
+
+        text = []
+        for i in xrange(start,end):
+            text.append([est[i] for est in result['text'][file]['est']])
+
+        x={}
+        x['cost'] = result['text'][file]['x'][0][start:end]
+        x['50'] = [np.median(t) for t in text]
+        x['75'] = [np.percentile(t,75) for t in text]
+        x['25'] = [np.percentile(t,25) for t in text]
+
+
+
+        combine = []
+        for i in xrange(start2,end2):
+            combine.append([est[i] for est in result['combine'][file]['est']])
+
+        y={}
+        y['cost'] = result['combine'][file]['x'][0][start2:end2]
+        y['50'] = [np.median(t) for t in combine]
+        y['75'] = [np.percentile(t,75) for t in combine]
+        y['25'] = [np.percentile(t,25) for t in combine]
+
+        u_random = []
+        for i in xrange(start3, end3):
+            u_random.append([est[i] for est in result['random'][file]['est']])
+
+        z = {}
+        z['cost'] = result['random'][file]['x'][0][start3:end3]
+        z['50'] = [np.median(t) for t in u_random]
+        z['75'] = [np.percentile(t, 75) for t in u_random]
+        z['25'] = [np.percentile(t, 25) for t in u_random]
+
+        offx = (7 - start + int(start3/10))%20
+        offy = (14 - start2 + int(start3/10))%20
+
+
+
+
+        ax=fig.add_subplot(3,2,id+1)
+
+        ax.plot(np.array(range(6))/10.0,[1]*6,color='black',linestyle = '-',label = 'true')
+
+        ax.plot(z['cost'],z['50'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = '-',label='Uniform Random Sampling')
+        ax.plot(z['cost'],z['75'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
+        ax.plot(z['cost'],z['25'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
+
+
+        ax.plot(x['cost'],x['50'],color='blue',marker='$\\circ$',markevery=(offx,20), markersize=25,linestyle = '-',label='Text')
+        ax.plot(x['cost'],x['75'],color='blue',marker='$\\circ$',markevery=(offx,20),markersize=25,linestyle = ':')
+        ax.plot(x['cost'],x['25'],color='blue',marker='$\\circ$',markevery=(offx,20),markersize=25,linestyle = ':')
+
+        ax.plot(y['cost'],y['50'],color='red',marker='$\\Delta$',markevery=(offy,20), markersize=25,linestyle = '-',label='Hybrid')
+        ax.plot(y['cost'],y['75'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle = ':')
+        ax.plot(y['cost'],y['25'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle = ':')
+        ax.set_ylabel("Estimation")
+        ax.set_xlabel("Cost\n"+titles[id])
+        plt.xlim(0.0,0.5)
+        plt.ylim(0.6,1.6)
+
+
+        # ax.set_title(titles[id])
+
+
+
+
+
+
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.94, left=0.05, bottom=0.08, right=0.98)
+    ax.legend(bbox_to_anchor=(-0.1, 3.92), loc=8, ncol=4, borderaxespad=0.)
+
+
+
+    # plt.ylabel("Estimation")
+    # plt.xlabel("Cost")
+    plt.savefig("../figure/est_6.pdf")
+    plt.savefig("../figure/est_6.png")
+    plt.close()
 
 
 def plot_feature():
@@ -2723,6 +2941,8 @@ def plot_feature():
 
 
         names = {'Arbitrary Code':'Arbitrary_Code', 'Improper Control of a Resource Through its Lifetime':'Resource_Control', 'Range Error':'Range_Error', 'Code Quality':'Code_Quality', 'Other':'Other', 'all':'all'}
+        plt.xlim(0.0,0.5)
+        plt.ylim(0.4,1.6)
 
         plt.ylabel("Estimation")
         plt.xlabel("Cost")

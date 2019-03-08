@@ -11,13 +11,14 @@ import matplotlib.pyplot as plt
 import time
 import os
 import pandas as pd
+import scipy.sparse.csr as csr
 
 
 class MAR(object):
     def __init__(self):
         self.fea_num = 4000
         self.step = 100
-        self.enough = 20
+        self.enough = 10
         self.kept=50
         self.atleast=100
         self.syn_thres = 0.8
@@ -1149,6 +1150,24 @@ class MAR(object):
             return uncertain_id, self.est[uncertain_id], certain_id, self.est[certain_id]
         else:
             return uncertain_id, uncertain_prob, certain_id, certain_prob
+
+    ## Train model ##
+    def train_semi(self,pne=False,weighting=True):
+        from qns3vm import QN_S3VM
+        import random
+        my_random_generator = random.Random()
+
+        labels = [1 if l=='yes' else -1 for l in self.body['code'][self.labeled]]
+
+        clf = QN_S3VM(self.csr_mat[self.labeled], labels, self.csr_mat[self.pool], my_random_generator)
+        pred = np.array(clf.train())
+
+        score = pred[self.pool]
+        uncertain = self.pool[np.argsort(np.abs(score))[:self.step]]
+        certain = self.pool[np.argsort(score)[::-1][:self.step]]
+
+
+        return uncertain, pred[uncertain], certain, pred[certain]
 
     ## reuse
     def train_reuse(self,pne=True):
