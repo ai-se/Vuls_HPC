@@ -2655,7 +2655,7 @@ def feature_summary():
     # import cPickle as pickle
     files = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
     vuls = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
-    features = ['combine','random','text','metrics','crash']
+    features = ['combine','random','text','metrics','crash', 'semi']
 
     result = {}
     for fea in features:

@@ -1159,7 +1159,7 @@ class MAR(object):
 
         labels = [1 if l=='yes' else -1 for l in self.body['code'][self.labeled]]
 
-        clf = QN_S3VM(self.csr_mat[self.labeled], labels, self.csr_mat[self.pool], my_random_generator)
+        clf = QN_S3VM(self.csr_mat[self.labeled], labels, self.csr_mat[self.pool], my_random_generator, estimate_r = 0)
         pred = np.array(clf.train())
 
         score = pred[self.pool]
