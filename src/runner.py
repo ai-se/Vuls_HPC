@@ -977,7 +977,6 @@ def Random(type, stop='true', error='none', error_rate = 0.5, correct = 'no', in
 
 def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correct = 'no', interval = 100000, seed=0, neg_len=0.5):
     stopat = 1
-    thres = 0
     starting = 1
     counter = 0
     pos_last = 0
@@ -989,7 +988,6 @@ def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correc
         read.correction=correct
         read.neg_len=float(neg_len)
     else:
-
         read.norm = 'l2col'
         read.metrics='only'
 
@@ -1024,7 +1022,7 @@ def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correc
                     read.code_error(id, error=error)
             break
 
-        if pos < starting or pos+neg<thres:
+        if pos < starting:
             for id in read.random():
                 read.code_error(id, error=error)
         else:

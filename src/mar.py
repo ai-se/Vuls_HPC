@@ -1086,7 +1086,7 @@ class MAR(object):
         decayed = list(left) + list(negs)
         unlabeled = np.where(np.array(self.body['code']) == "undetermined")[0]
         try:
-            unlabeled = np.random.choice(unlabeled,size=np.max((len(left),self.atleast)),replace=False)
+            unlabeled = np.random.choice(unlabeled,size=np.max((len(decayed),2*len(left),self.atleast)),replace=False)
         except:
             pass
 
@@ -1151,23 +1151,60 @@ class MAR(object):
         else:
             return uncertain_id, uncertain_prob, certain_id, certain_prob
 
-    ## Train model ##
+
+
+        ## Train model ##
     def train_semi(self,pne=False,weighting=True):
         from qns3vm import QN_S3VM
         import random
+
+        poses = np.where(np.array(self.body['code']) == "yes")[0]
+        negs = np.where(np.array(self.body['code']) == "no")[0]
+
+        if len(poses)>= self.enough:
+            clf = svm.SVC(kernel='linear', probability=True, class_weight='balanced') if weighting else svm.SVC(kernel='linear', probability=True)
+            left = poses
+            decayed = list(left) + list(negs)
+            unlabeled = np.where(np.array(self.body['code']) == "undetermined")[0]
+            try:
+                unlabeled = np.random.choice(unlabeled,size=np.max((len(decayed),2*len(left),self.atleast)),replace=False)
+            except:
+                pass
+
+            if not pne:
+                unlabeled=[]
+
+            labels=np.array([x if x!='undetermined' else 'no' for x in self.body['code']])
+            all_neg=list(negs)+list(unlabeled)
+            sample = list(decayed) + list(unlabeled)
+
+            clf.fit(self.csr_mat[sample], labels[sample])
+
+
+            ## aggressive undersampling ##
+
+            train_dist = clf.decision_function(self.csr_mat[all_neg])
+            pos_at = list(clf.classes_).index("yes")
+            if pos_at:
+                train_dist=-train_dist
+            negs_sel = np.argsort(train_dist)[::-1][:len(left)]
+            sample = list(left) + list(np.array(all_neg)[negs_sel])
+        else:
+            sample = self.labeled
+
         my_random_generator = random.Random()
 
-        labels = [1 if l=='yes' else -1 for l in self.body['code'][self.labeled]]
+        labels = np.array([1 if l=='yes' else -1 for l in self.body['code']])
 
-        clf = QN_S3VM(self.csr_mat[self.labeled], labels, self.csr_mat[self.pool], my_random_generator, estimate_r = 0)
+        clf = QN_S3VM(self.csr_mat[sample], labels[sample], self.csr_mat[self.pool], my_random_generator, estimate_r = 0)
         pred = np.array(clf.train())
 
-        score = pred[self.pool]
-        uncertain = self.pool[np.argsort(np.abs(score))[:self.step]]
-        certain = self.pool[np.argsort(score)[::-1][:self.step]]
+        score = pred[len(sample):]
+        uncertain = np.argsort(np.abs(score))[:self.step]
+        certain = np.argsort(score)[::-1][:self.step]
 
 
-        return uncertain, pred[uncertain], certain, pred[certain]
+        return self.pool[uncertain], score[uncertain], self.pool[certain], score[certain]
 
     ## reuse
     def train_reuse(self,pne=True):
