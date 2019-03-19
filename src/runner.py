@@ -975,7 +975,7 @@ def Random(type, stop='true', error='none', error_rate = 0.5, correct = 'no', in
     print(results)
     return read
 
-def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correct = 'no', interval = 100000, seed=0, neg_len=0.5):
+def Semi(type, fea = 'text', uncertain = False, stop='true', error='none', error_rate = 0.5, correct = 'no', interval = 100000, seed=0, neg_len=0.5):
     stopat = 1
     starting = 1
     counter = 0
@@ -999,7 +999,7 @@ def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correc
     num2 = read.get_allpos()
     target = int(num2 * stopat)
 
-    read.enable_est = True
+    read.enable_est = False
 
 
     while True:
@@ -1026,7 +1026,10 @@ def Semi(type, fea = 'text', stop='true', error='none', error_rate = 0.5, correc
             for id in read.random():
                 read.code_error(id, error=error)
         else:
-            a,b,c,d =read.train_semi(weighting=True)
+            if pos < 10 and uncertain:
+                a,b,c,d =read.train(weighting=True,pne=True)
+            else:
+                a,b,c,d =read.train_semi(weighting=True)
             if stop == 'est':
                 if stopat * read.est_num <= pos:
                     break
@@ -1849,7 +1852,7 @@ def error_hpcc_feature(fea, seed = 1):
     seed = int(seed)
     np.random.seed(seed)
     types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
-    # types = ['all']
+    # types = ['Range Error']
 
 
     results={}
@@ -1872,7 +1875,9 @@ def error_hpcc_feature(fea, seed = 1):
         elif fea == 'crash':
             result = CRASH(type,stop='true',seed=seed)
         elif fea == 'semi':
-            result = Semi(type,stop='true',seed=seed)
+            result = Semi(type,uncertain=False,stop='true',seed=seed)
+        elif fea == 'semi2':
+            result = Semi(type,uncertain=True,stop='true',seed=seed)
         else:
             result = Rand(type,stop='true',seed=seed)
         if fea=='random':
@@ -2652,7 +2657,7 @@ def error_sumlatex():
 def feature_summary():
     # import cPickle as pickle
     files = {'Arbitrary Code':28750, 'Improper Control of a Resource Through its Lifetime':28750, 'Other':28750, 'Range Error':28750, 'Code Quality':28750, 'all':28750}
-    vuls = {'Arbitrary Code':118, 'Improper Control of a Resource Through its Lifetime':81, 'Other':42, 'Range Error':32, 'Code Quality':29, 'all':271}
+    vuls = {'Arbitrary Code':119, 'Improper Control of a Resource Through its Lifetime':85, 'Other':32, 'Range Error':35, 'Code Quality':29, 'all':271}
     features = ['combine','random','text','metrics','crash', 'semi']
 
     result = {}

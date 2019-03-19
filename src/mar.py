@@ -1165,18 +1165,9 @@ class MAR(object):
             clf = svm.SVC(kernel='linear', probability=True, class_weight='balanced') if weighting else svm.SVC(kernel='linear', probability=True)
             left = poses
             decayed = list(left) + list(negs)
-            unlabeled = np.where(np.array(self.body['code']) == "undetermined")[0]
-            try:
-                unlabeled = np.random.choice(unlabeled,size=np.max((len(decayed),2*len(left),self.atleast)),replace=False)
-            except:
-                pass
-
-            if not pne:
-                unlabeled=[]
-
             labels=np.array([x if x!='undetermined' else 'no' for x in self.body['code']])
-            all_neg=list(negs)+list(unlabeled)
-            sample = list(decayed) + list(unlabeled)
+            all_neg=list(negs)
+            sample = list(decayed)
 
             clf.fit(self.csr_mat[sample], labels[sample])
 
