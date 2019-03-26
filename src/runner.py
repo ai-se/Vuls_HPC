@@ -1851,7 +1851,8 @@ def auto_plot2():
 def error_hpcc_feature(fea, seed = 1):
     seed = int(seed)
     np.random.seed(seed)
-    types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    # types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    types = ['Other', 'Range Error', 'Code Quality', 'all']
     # types = ['Range Error']
 
 
