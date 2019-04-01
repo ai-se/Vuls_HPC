@@ -1848,45 +1848,6 @@ def auto_plot2():
 
 
 
-def error_hpcc_feature(fea, seed = 1):
-    seed = int(seed)
-    np.random.seed(seed)
-    # types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
-    types = ['Other', 'Range Error', 'Code Quality', 'all']
-    # types = ['Range Error']
-
-
-    results={}
-
-    for type in types:
-        try:
-            with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","r") as handle:
-                results = pickle.load(handle)
-        except:
-            pass
-        print(str(seed)+": "+type+": "+ fea+ ": ", end='')
-        if fea == 'combine':
-            result = BM25(type,stop='mix',seed=seed)
-        elif fea == 'text':
-            result = Random(type,stop='mix',seed=seed)
-        elif fea == 'metrics':
-            result = Metrics(type,stop='true',seed=seed)
-        elif fea == 'random':
-            result = Rand(type,stop='true',seed=seed)
-        elif fea == 'crash':
-            result = CRASH(type,stop='true',seed=seed)
-        elif fea == 'semi':
-            result = Semi(type,uncertain=False,stop='true',seed=seed)
-        elif fea == 'semi2':
-            result = Semi(type,uncertain=True,stop='true',seed=seed)
-        else:
-            result = Rand(type,stop='true',seed=seed)
-        if fea=='random':
-            results[type] = result
-        else:
-            results[type] = {'pos':result.record,'est':result.record_est}
-        with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","w") as handle:
-            pickle.dump(results,handle)
 
 def error_hpcc_more(cor, error_rate = 0.5, seed = 1):
     error_rate = float(error_rate)
@@ -2653,6 +2614,43 @@ def error_sumlatex():
 
 
 ############
+def error_hpcc_feature(fea, seed = 1):
+    seed = int(seed)
+    np.random.seed(seed)
+    # types = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Other', 'Range Error', 'Code Quality', 'all']
+    types = ['all']
+    # types = ['Range Error']
+
+
+    results={}
+
+    for type in types:
+        try:
+            with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","r") as handle:
+                results = pickle.load(handle)
+        except:
+            pass
+        print(str(seed)+": "+type+": "+ fea+ ": ", end='')
+        if fea == 'combine':
+            result = BM25(type,stop='mix',seed=seed)
+        elif fea == 'text':
+            result = Random(type,stop='mix',seed=seed)
+        elif fea == 'metrics':
+            result = Metrics(type,stop='true',seed=seed)
+        elif fea == 'random':
+            result = Rand(type,stop='true',seed=seed)
+        elif fea == 'crash':
+            result = CRASH(type,stop='true',seed=seed)
+        elif fea == 'semi':
+            result = Semi(type,uncertain=False,stop='true',seed=seed)
+        else:
+            result = Rand(type,stop='true',seed=seed)
+        if fea=='random':
+            results[type] = result
+        else:
+            results[type] = {'pos':result.record,'est':result.record_est}
+        with open("../dump/features_"+str(fea)+"_hpcc_"+str(seed)+".pickle","w") as handle:
+            pickle.dump(results,handle)
 
 
 def feature_summary():
@@ -2846,113 +2844,6 @@ def plot_all_feature():
     plt.savefig("../figure/est_6.pdf")
     plt.savefig("../figure/est_6.png")
     plt.close()
-
-
-def plot_feature():
-    filename = '../dump/features.pickle'
-    result = pickle.load(open(filename, 'r'))
-    files = ['Arbitrary Code', 'Improper Control of a Resource Through its Lifetime', 'Range Error', 'Code Quality', 'Other', 'all']
-    # files = ['all']
-
-    font = {'family': 'normal',
-            'weight': 'bold',
-            'size': 30}
-
-
-    plt.rc('font', **font)
-    paras = {'lines.linewidth': 1, 'legend.fontsize': 28, 'axes.labelsize': 40, 'legend.frameon': True,
-             'figure.autolayout': False, 'figure.figsize': (16, 6)}
-    plt.rcParams.update(paras)
-
-
-    for file in files:
-        start = 0
-        end = 1000000
-        for est in result['text'][file]['est']:
-            start = max((start,np.where(est==0)[0][-1]+1))
-            end = min((end,len(est)))
-        start2 = 0
-        end2 = 1000000
-        for est in result['combine'][file]['est']:
-            start2 = max((start2,np.where(est==0)[0][-1]+1))
-            end2 = min((end2,len(est)))
-
-        start = max((start,start2))
-        end = min((end,end2))
-
-
-
-        text = []
-        for i in xrange(start,end):
-            text.append([est[i] for est in result['text'][file]['est']])
-
-        x={}
-        x['cost'] = result['text'][file]['x'][0][start:end]
-        x['50'] = [np.median(t) for t in text]
-        x['75'] = [np.percentile(t,75) for t in text]
-        x['25'] = [np.percentile(t,25) for t in text]
-
-
-
-        combine = []
-        for i in xrange(start,end):
-            combine.append([est[i] for est in result['combine'][file]['est']])
-
-        y={}
-        y['cost'] = result['combine'][file]['x'][0][start:end]
-        y['50'] = [np.median(t) for t in combine]
-        y['75'] = [np.percentile(t,75) for t in combine]
-        y['25'] = [np.percentile(t,25) for t in combine]
-
-        u_random = []
-        for i in xrange(start*10, end*10):
-            u_random.append([est[i] for est in result['random'][file]['est']])
-
-        z = {}
-        z['cost'] = result['random'][file]['x'][0][start*10:end*10]
-        z['50'] = [np.median(t) for t in u_random]
-        z['75'] = [np.percentile(t, 75) for t in u_random]
-        z['25'] = [np.percentile(t, 25) for t in u_random]
-
-
-
-
-
-        plt.figure(1)
-        ax=plt.subplot(111)
-
-        ax.plot(x['cost'],[1]*len(x['cost']),color='black',linestyle = '-',label = 'true')
-
-        ax.plot(z['cost'],z['50'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = '-',label='Uniform\nRandom\nSampling')
-        ax.plot(z['cost'],z['75'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
-        ax.plot(z['cost'],z['25'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
-
-
-        ax.plot(x['cost'],x['50'],color='blue',marker='$\\circ$',markevery=(7,20), markersize=25,linestyle = '-',label='Text')
-        ax.plot(x['cost'],x['75'],color='blue',marker='$\\circ$',markevery=(7,20),markersize=25,linestyle = ':')
-        ax.plot(x['cost'],x['25'],color='blue',marker='$\\circ$',markevery=(7,20),markersize=25,linestyle = ':')
-
-        ax.plot(y['cost'],y['50'],color='red',marker='$\\Delta$',markevery=(14,20), markersize=25,linestyle = '-',label='Hybrid')
-        ax.plot(y['cost'],y['75'],color='red',marker='$\\Delta$',markevery=(14,20),markersize=25,linestyle = ':')
-        ax.plot(y['cost'],y['25'],color='red',marker='$\\Delta$',markevery=(14,20),markersize=25,linestyle = ':')
-
-
-
-
-
-        plt.subplots_adjust(top=0.95, left=0.12, bottom=0.2, right=0.75)
-        ax.legend(bbox_to_anchor=(1.02, 1), loc=2, ncol=1, borderaxespad=0.)
-
-
-        names = {'Arbitrary Code':'Arbitrary_Code', 'Improper Control of a Resource Through its Lifetime':'Resource_Control', 'Range Error':'Range_Error', 'Code Quality':'Code_Quality', 'Other':'Other', 'all':'all'}
-        plt.xlim(0.0,0.5)
-        plt.ylim(0.4,1.6)
-
-        plt.ylabel("Estimation")
-        plt.xlabel("Cost")
-        plt.savefig("../figure/est_" + str(names[file]) + ".pdf")
-        plt.savefig("../figure/est_" + str(names[file]) + ".png")
-        plt.close()
 
 
 def sum_feature():
