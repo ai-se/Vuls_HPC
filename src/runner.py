@@ -2783,6 +2783,7 @@ def plot_all_feature():
             combine.append([est[i] for est in result['combine'][file]['est']])
 
         y={}
+
         y['cost'] = result['combine'][file]['x'][0][start2:end2]
         y['50'] = [np.median(t) for t in combine]
         y['75'] = [np.percentile(t,75) for t in combine]
@@ -2798,9 +2799,12 @@ def plot_all_feature():
         z['75'] = [np.percentile(t, 75) for t in u_random]
         z['25'] = [np.percentile(t, 25) for t in u_random]
 
-        offx = (7 - start + int(start3/10))%20
-        offy = (14 - start2 + int(start3/10))%20
+        offx = int((7 - start + int(start3/10))%20)
+        offy = int((14 - start2 + int(start3/10))%20)
 
+
+        small = 1
+        dash_stype = (3,10)
 
 
 
@@ -2809,17 +2813,32 @@ def plot_all_feature():
         ax.plot(np.array(range(6))/10.0,[1]*6,color='black',linestyle = '-',label = 'true')
 
         ax.plot(z['cost'],z['50'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = '-',label='Uniform Random Sampling')
-        ax.plot(z['cost'],z['75'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
-        ax.plot(z['cost'],z['25'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle = ':')
+        ax.plot(z['cost'],z['75'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
+        ax.plot(z['cost'],z['25'],color='green',marker='$\\boxdot$',markevery=(0,200), markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
 
 
         ax.plot(x['cost'],x['50'],color='blue',marker='$\\circ$',markevery=(offx,20), markersize=25,linestyle = '-',label='Text')
-        ax.plot(x['cost'],x['75'],color='blue',marker='$\\circ$',markevery=(offx,20),markersize=25,linestyle = ':')
-        ax.plot(x['cost'],x['25'],color='blue',marker='$\\circ$',markevery=(offx,20),markersize=25,linestyle = ':')
+        ax.plot(x['cost'],x['75'],color='blue',marker='$\\circ$',markevery=(offx,20), markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
+        ax.plot(x['cost'],x['25'],color='blue',marker='$\\circ$',markevery=(offx,20),markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
 
         ax.plot(y['cost'],y['50'],color='red',marker='$\\Delta$',markevery=(offy,20), markersize=25,linestyle = '-',label='Hybrid')
-        ax.plot(y['cost'],y['75'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle = ':')
-        ax.plot(y['cost'],y['25'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle = ':')
+        ax.plot(y['cost'],y['75'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
+        ax.plot(y['cost'],y['25'],color='red',marker='$\\Delta$',markevery=(offy,20),markersize=25,linestyle='--', dashes=dash_stype,linewidth = small)
+
+        # ax.plot(np.array(range(6))/10.0,[1]*6,color='black',linestyle = '-',label = 'true')
+        #
+        # ax.plot(z['cost'],z['50'],color='black',linestyle = ':',label='Uniform Random Sampling')
+        # ax.plot(z['cost'],z['75'],color='gray',linestyle = ':')
+        # ax.plot(z['cost'],z['25'],color='gray',linestyle = ':')
+        #
+        #
+        # ax.plot(x['cost'],x['50'],color='black',linestyle = '--',label='Text')
+        # ax.plot(x['cost'],x['75'],color='gray',linestyle = '--')
+        # ax.plot(x['cost'],x['25'],color='gray',linestyle = '--')
+        #
+        # ax.plot(y['cost'],y['50'],color='black',linestyle = '-.',label='Hybrid')
+        # ax.plot(y['cost'],y['75'],color='gray',linestyle = '-.')
+        # ax.plot(y['cost'],y['25'],color='gray',linestyle = '-.')
         ax.set_ylabel("Estimation")
         ax.set_xlabel("Cost\n"+titles[id])
         plt.xlim(0.0,0.5)
